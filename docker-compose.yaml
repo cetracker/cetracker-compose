@@ -1,0 +1,102 @@
+name: cetracker
+services:
+  cetrack-frontend:
+    image: ghcr.io/cetracker/cetrack-backend:latest
+    pull_policy: missing
+    networks:
+      backend:
+        aliases:
+          - frontend
+        ipv4_address: 10.0.1.1
+    ports:
+      - "80:80"
+    depends_on:
+      - cetrack-backend
+
+  cetrack-backend:
+    image: ghcr.io/cetracker/cetrack-backend:latest
+    pull_policy: missing
+    hostname: backend
+    networks:
+      backend:
+        aliases:
+          - backend
+        ipv4_address: 10.0.0.10  
+      persistence:
+        aliases:
+          - backend
+        ipv4_address: 10.0.1.10  
+    expose:
+      - 8080
+    depends_on:
+      cetrack-db:
+        condition: service_healthy
+
+  cetrack-db:
+    image: mysql:8.0.28
+    pull_policy: missing
+    restart: unless-stopped
+    # command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ceparts
+      MYSQL_USER: parts
+      MYSQL_PASSWORD: parts
+    #   FILE__MYSQL_ROOT_PASSWORD: /run/secrets/mysql_root_password
+    #   FILE__MYSQL_PASSWORD: /run/secrets/mysql_password
+    # secrets:
+    #   - mysql_root_password
+    #   - mysql_password
+    healthcheck:
+      # https://stackoverflow.com/a/62986398
+      test: out=$$(mysqladmin ping -h localhost -P 3306 -u root --password=root 2>&1); echo $$out | grep 'mysqld is alive' || { echo $$out; exit 1; }
+      # test: out=$$(mysqladmin ping -h localhost -P 3306 -u root --password=$$(cat $${FILE__MYSQL_ROOT_PASSWORD}) 2>&1); echo $$out | grep 'mysqld is alive' || { echo $$out; exit 1; }
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - type: volume
+        source: mysql-data
+        target: /var/lib/mysq
+        # volume:
+        #   nocopy: true
+    hostname: mysql
+    networks:
+      persistence:
+        aliases:
+          - mysql
+        ipv4_address: 10.0.1.20
+    expose:
+      - 3306
+    ports:
+      - "3306:3306"
+
+volumes:
+  mysql-data:
+  #https://stackoverflow.com/a/40030535
+    driver: local
+    driver_opts:
+      type: 'none'
+      device: ${PWD}/dbdata
+      o: 'bind'
+
+
+secrets:
+  mysql_root_password:
+    file: ${SECRETSDIR}/mysql_root_password
+  mysql_password:
+    file: ${SECRETSDIR}/mysql_password
+
+
+networks:
+  backend:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.0.0/24
+  persistence:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.1.0/24
