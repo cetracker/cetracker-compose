@@ -1,31 +1,35 @@
 name: cetracker
 services:
   cetrack-frontend:
-    image: ghcr.io/cetracker/cetrack-backend:latest
+    # image: ghcr.io/cetracker/cetrack-frontend:latest
+    image: ghcr.io/cetracker/cetrack-frontend:0.0.1-SNAPSHOT
+    container_name: cetrack-frontend
     pull_policy: missing
     networks:
       backend:
         aliases:
           - frontend
-        ipv4_address: 10.0.1.1
+        ipv4_address: 10.0.0.10
     ports:
       - "80:80"
     depends_on:
       - cetrack-backend
 
   cetrack-backend:
-    image: ghcr.io/cetracker/cetrack-backend:latest
+    # image: ghcr.io/cetracker/cetrack-backend:latest
+    image: ghcr.io/cetracker/cetrack-backend:0.0.1-SNAPSHOT
+    container_name: cetrack-backend
     pull_policy: missing
     hostname: backend
     networks:
       backend:
         aliases:
           - backend
-        ipv4_address: 10.0.0.10  
+        ipv4_address: 10.0.0.20
       persistence:
         aliases:
           - backend
-        ipv4_address: 10.0.1.10  
+        ipv4_address: 10.0.1.20
     expose:
       - 8080
     depends_on:
@@ -34,6 +38,7 @@ services:
 
   cetrack-db:
     image: mysql:8.0.28
+    container_name: cetrack-mysql
     pull_policy: missing
     restart: unless-stopped
     # command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
@@ -58,7 +63,7 @@ services:
     volumes:
       - type: volume
         source: mysql-data
-        target: /var/lib/mysq
+        target: /var/lib/mysql
         # volume:
         #   nocopy: true
     hostname: mysql
@@ -66,7 +71,7 @@ services:
       persistence:
         aliases:
           - mysql
-        ipv4_address: 10.0.1.20
+        ipv4_address: 10.0.1.30
     expose:
       - 3306
     ports:
@@ -81,13 +86,11 @@ volumes:
       device: ${PWD}/dbdata
       o: 'bind'
 
-
-secrets:
-  mysql_root_password:
-    file: ${SECRETSDIR}/mysql_root_password
-  mysql_password:
-    file: ${SECRETSDIR}/mysql_password
-
+# secrets:
+#   mysql_root_password:
+#     file: ${SECRETSDIR}/mysql_root_password
+#   mysql_password:
+#     file: ${SECRETSDIR}/mysql_password
 
 networks:
   backend:
