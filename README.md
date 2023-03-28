@@ -1,43 +1,26 @@
-# Cyling Equipment Tracker
+# CETracker Container Compose
 
-This a small and private tool for tracking the milage of parts and equipment
-used on my bike(s). The tour data can be imported from MyTourbook which I used
-to collect all my tour data locally.
+This Repo contains a `docker-compose` file as well as instructions for running all partes of CETracker containerized together.
+
+For more information about this project see the [project's homeage](https://cetracker.github.io/).
 
 ## Setup
 
-This is the docker compose file for running CETracker spinning up containers for
-both: the frontend (cetracker-frontend) as well as the backend
-(cetracker-backend) plus a MySQL database.  
+It's recommended to clone this repository. This will create a sub folder called `dbdata` where all data is persisted too.
+To change it's location, the line `device: ${PWD}/dbdata` inside the `docker-compose.yaml` needs to be adopted accordingly.
+
+If you just downloaded the `docker-compose.yaml`, you will at least create a sub folder named `dbdata` for CETracker to start up successfully.
+
+## Runing Instructions
+
 Just run `docker-compose up` in your prefered shell. Add a `-d` if you like to
-run in daemonized in the background.
+run it daemonized in the background.  
+This will startup a MySQL database container and both CETracker's container for back- and frontend.
 
-### Database Path
+### Running with Demo Data
 
-ToDo - describe storage of the data outside of the container
+CETracker may be started in a demo modus where it's database is seeded with some sample data.
+A in memory database is used when runing in demo mode. All changes made will **not** be persisted and will be lost on shutdown.
 
-### Backup Database
-
-#### Backup
-
-ToDo - describe backup process - mysqldump?
-
-#### Restore
-
-```bash
-docker exec -it cetrack-db mysql -p<USER_PWD_FROM_docker-dompose> ceparts < path-to-file.sql
-```
-
-## Development (Hints)
-
-### To use with MySQL - Workbench
-
-```bash
-docker exec -it  cetrack-mysql-ceparts-1 bash
-```
-
-```sql
-ALTER USER 'root' IDENTIFIED WITH mysql_native_password BY 'root';
-```
-
-Source: [SO Post](https://stackoverflow.com/a/50130875/2664521)
+To use the demo mode, `SPRING_PROFILES_ACTIVE='demo'` needs to be set as enviroment variable for the backend container.
+Please see the line `SPRING_PROFILES_ACTIVE: '' # use 'demo' for Demo data` inside the `docker-compose.yaml`

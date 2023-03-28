@@ -2,7 +2,7 @@ name: cetracker
 services:
   cetrack-frontend:
     # image: ghcr.io/cetracker/cetrack-frontend:latest
-    image: ghcr.io/cetracker/cetrack-frontend:0.0.1-SNAPSHOT
+    image: ghcr.io/cetracker/cetrack-frontend:0.1.0-SNAPSHOT
     container_name: cetrack-frontend
     pull_policy: missing
     networks:
@@ -16,11 +16,21 @@ services:
       - cetrack-backend
 
   cetrack-backend:
-    # image: ghcr.io/cetracker/cetrack-backend:latest
-    image: ghcr.io/cetracker/cetrack-backend:0.0.1-SNAPSHOT
+    image: ghcr.io/cetracker/cetrack-backend:0.1.0-SNAPSHOT
     container_name: cetrack-backend
     pull_policy: missing
     hostname: backend
+    environment:
+      # default in Image (Dockerfile) is 'mysql'
+      # SPRING_PROFILES_ACTIVE: demo # uncomment for Demo data
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ceparts
+      MYSQL_USER: parts
+      MYSQL_PASSWORD: parts
+      MYSQL_USE_SSL: true
+      MYSQL_REQUIRE_SSL: false
+      MYSQL_VERIFY_SERVER_CERTIFICATE: false
     networks:
       backend:
         aliases:
