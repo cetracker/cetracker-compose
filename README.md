@@ -14,7 +14,8 @@ If you just downloaded the `docker-compose.yaml`, you will at least create a sub
 ## Runing Instructions
 
 Just run `docker-compose up` in your prefered shell. Add a `-d` if you like to
-run it daemonized in the background.
+run it daemonized in the background.  
+You need to have [Docker Compose V2](https://docs.docker.com/compose/) (some platforms might need Docker Desktop?) installed on your machine. Some info about the [docker-compose file](https://docs.docker.com/compose/compose-file/).
 
 ```bash
 git clone git@github.com:cetracker/cetracker-compose.git
