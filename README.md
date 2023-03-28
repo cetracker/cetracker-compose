@@ -23,6 +23,8 @@ docker-compose up
 ```
 
 This will startup a MySQL database container and both CETracker's container for back- and frontend.
+Please allow about a minute for the database starting up before you can access
+CETracker via [http://localhost](http://localhost)
 
 ### Running with Demo Data
 
