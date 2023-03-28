@@ -14,7 +14,14 @@ If you just downloaded the `docker-compose.yaml`, you will at least create a sub
 ## Runing Instructions
 
 Just run `docker-compose up` in your prefered shell. Add a `-d` if you like to
-run it daemonized in the background.  
+run it daemonized in the background.
+
+```bash
+git clone git@github.com:cetracker/cetracker-compose.git
+cd cetracker-compose
+docker-compose up
+```
+
 This will startup a MySQL database container and both CETracker's container for back- and frontend.
 
 ### Running with Demo Data
