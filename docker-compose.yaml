@@ -1,7 +1,7 @@
 name: cetracker
 services:
   cetrack-frontend:
-    image: ghcr.io/cetracker/cetrack-frontend:v0.2.6
+    image: ghcr.io/cetracker/cetrack-frontend:v2.3.0
     container_name: cetrack-frontend
     pull_policy: missing
     networks:
@@ -15,7 +15,7 @@ services:
       - cetrack-backend
 
   cetrack-backend:
-    image: ghcr.io/cetracker/cetrack-backend:v0.2.6
+    image: ghcr.io/cetracker/cetrack-backend:v0.6.0
     container_name: cetrack-backend
     pull_policy: missing
     hostname: backend
@@ -31,6 +31,7 @@ services:
       MYSQL_USE_SSL: true
       MYSQL_REQUIRE_SSL: false
       MYSQL_VERIFY_SERVER_CERTIFICATE: false
+      APP_MYTOURBOOK_WORKDIR: /var/lib/cetrack/mtb-upload
     networks:
       backend:
         aliases:
@@ -40,6 +41,10 @@ services:
         aliases:
           - backend
         ipv4_address: 10.0.1.20
+    volumes:
+      - type: volume
+        source: mtb-work
+        target: /var/lib/cetrack/mtb-work
     expose:
       - 8080
     ports:
@@ -96,6 +101,12 @@ volumes:
     driver_opts:
       type: 'none'
       device: ${PWD}/dbdata
+      o: 'bind'
+  mtb-upload:
+    driver: local
+    driver_opts:
+      type: 'none'
+      device: ${PWD}/mtb-upload
       o: 'bind'
 
 # secrets:
