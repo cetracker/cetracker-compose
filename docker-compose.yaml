@@ -1,7 +1,7 @@
 name: cetracker
 services:
   cetrack-frontend:
-    image: ghcr.io/cetracker/cetrack-frontend:v2.4.1
+    image: ghcr.io/cetracker/cetrack-frontend:v2.4.2
     container_name: cetrack-frontend
     pull_policy: missing
     networks:
