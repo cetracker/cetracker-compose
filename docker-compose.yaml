@@ -22,7 +22,6 @@ services:
     environment:
       # default in Image (Dockerfile) is 'mysql'
       # SPRING_PROFILES_ACTIVE: demo # uncomment for Demo data
-      SPRING_PROFILES_ACTIVE: demo # uncomment for Demo data
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_DATABASE: ceparts
@@ -43,8 +42,8 @@ services:
         ipv4_address: 10.0.1.20
     volumes:
       - type: volume
-        source: mtb-work
-        target: /var/lib/cetrack/mtb-work
+        source: mtb-upload
+        target: /var/lib/cetrack/mtb-upload
     expose:
       - 8080
     ports:
@@ -54,11 +53,19 @@ services:
         condition: service_healthy
 
   cetrack-db:
-    image: mysql:8.0.32
+    # hardened image - requires `docker login dhi.io`
+    # image: dhi.io/mysql:8
+    # but needs chmod -R 65532:65532 dbdata `docker run --rm dhi.io/mysql:8 id`
+    
+    # image mysql:8.4 =>
+    image: mysql@sha256:d36d39a64cd12a5c1cc9e6aa2bfb5f8d4c81a2f6586e0a04a9ae13939db02209
     container_name: cetrack-mysql
     pull_policy: missing
     restart: unless-stopped
     # command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    # For a warning Failed to set NUMA memory policy … mbind … Operation not permitted
+    # command:
+    #  - --innodb-numa-interleave=0
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: ceparts
