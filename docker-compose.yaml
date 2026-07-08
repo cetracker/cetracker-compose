@@ -20,16 +20,13 @@ services:
     pull_policy: missing
     hostname: backend
     environment:
-      # default in Image (Dockerfile) is 'mysql'
+      # default in Image (Dockerfile) is 'postgres'
       # SPRING_PROFILES_ACTIVE: demo # uncomment for Demo data
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
-      MYSQL_DATABASE: ceparts
-      MYSQL_USER: parts
-      MYSQL_PASSWORD: parts
-      MYSQL_USE_SSL: true
-      MYSQL_REQUIRE_SSL: false
-      MYSQL_VERIFY_SERVER_CERTIFICATE: false
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: cetracker
+      POSTGRES_USER: cet
+      POSTGRES_PASSWORD: components
       APP_MYTOURBOOK_WORKDIR: /var/lib/cetrack/mtb-upload
     networks:
       backend:
@@ -54,55 +51,48 @@ services:
 
   cetrack-db:
     # hardened image - requires `docker login dhi.io`
-    # image: dhi.io/mysql:8
-    # but needs chmod -R 65532:65532 dbdata `docker run --rm dhi.io/mysql:8 id`
-    
-    # image mysql:8.4 =>
-    image: mysql@sha256:d36d39a64cd12a5c1cc9e6aa2bfb5f8d4c81a2f6586e0a04a9ae13939db02209
-    container_name: cetrack-mysql
+    # image: dhi.io/postgres:17
+    # but needs chmod -R 65532:65532 dbdata `docker run --rm dhi.io/postgres:17 id`
+
+    # image postgres:17 =>
+    image: postgres@sha256:de1e13ca94377fa5a27aafd0e9fc200df9692b15152f0090fdf074074ea5e397
+    container_name: cetrack-postgres
     pull_policy: missing
     restart: unless-stopped
-    # command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
-    # For a warning Failed to set NUMA memory policy … mbind … Operation not permitted
-    # command:
-    #  - --innodb-numa-interleave=0
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: ceparts
-      MYSQL_USER: parts
-      MYSQL_PASSWORD: parts
-    #   FILE__MYSQL_ROOT_PASSWORD: /run/secrets/mysql_root_password
-    #   FILE__MYSQL_PASSWORD: /run/secrets/mysql_password
+      POSTGRES_DB: cetracker
+      POSTGRES_USER: cet
+      POSTGRES_PASSWORD: components
+      # subdirectory so the bind mount root may be non-empty (lost+found etc.)
+      PGDATA: /var/lib/postgresql/data/pgdata
+    #   FILE__POSTGRES_PASSWORD: /run/secrets/postgres_password
     # secrets:
-    #   - mysql_root_password
-    #   - mysql_password
+    #   - postgres_password
     healthcheck:
-      # https://stackoverflow.com/a/62986398
-      test: out=$$(mysqladmin ping -h localhost -P 3306 -u root --password=root 2>&1); echo $$out | grep 'mysqld is alive' || { echo $$out; exit 1; }
-      # test: out=$$(mysqladmin ping -h localhost -P 3306 -u root --password=$$(cat $${FILE__MYSQL_ROOT_PASSWORD}) 2>&1); echo $$out | grep 'mysqld is alive' || { echo $$out; exit 1; }
+      test: pg_isready -U cet -d cetracker
       interval: 20s
       timeout: 5s
       retries: 5
       start_period: 30s
     volumes:
       - type: volume
-        source: mysql-data
-        target: /var/lib/mysql
+        source: postgres-data
+        target: /var/lib/postgresql/data
         # volume:
         #   nocopy: true
-    hostname: mysql
+    hostname: postgres
     networks:
       persistence:
         aliases:
-          - mysql
+          - postgres
         ipv4_address: 10.0.1.30
     expose:
-      - 3306
+      - 5432
     ports:
-      - "3306:3306"
+      - "5432:5432"
 
 volumes:
-  mysql-data:
+  postgres-data:
   #https://stackoverflow.com/a/40030535
     driver: local
     driver_opts:
@@ -117,10 +107,8 @@ volumes:
       o: 'bind'
 
 # secrets:
-#   mysql_root_password:
-#     file: ${SECRETSDIR}/mysql_root_password
-#   mysql_password:
-#     file: ${SECRETSDIR}/mysql_password
+#   postgres_password:
+#     file: ${SECRETSDIR}/postgres_password
 
 networks:
   backend:
