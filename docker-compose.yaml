@@ -28,6 +28,7 @@ services:
       POSTGRES_USER: cet
       POSTGRES_PASSWORD: components
       APP_MYTOURBOOK_WORKDIR: /var/lib/cetrack/mtb-upload
+      # CETRACK_EDIT_PIN: 123456 # uncomment to PIN-gate mutating /api requests
     networks:
       backend:
         aliases:
@@ -88,8 +89,6 @@ services:
         ipv4_address: 10.0.1.30
     expose:
       - 5432
-    ports:
-      - "5432:5432"
 
 volumes:
   postgres-data:
