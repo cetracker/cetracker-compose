@@ -20,6 +20,8 @@ You need to have [Docker Compose V2](https://docs.docker.com/compose/) (some pla
 ```bash
 git clone git@github.com:cetracker/cetracker-compose.git
 cd cetracker-compose
+mkdir dbdata       # you might want to store your db data somewhere else - adjust docker-compose.yaml accordingly
+mkdir mtb-upload   # needed for backend container - remove from docker-compose.yaml if you don't need this feature
 docker-compose up
 ```
 
